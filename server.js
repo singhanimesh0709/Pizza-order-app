@@ -8,6 +8,9 @@ const app = express();
 
 const PORT = process.env.PORT || 3000;
 
+//assets
+app.use(express.static('public'));
+
 //set template engine
 //app.use(expressLayouts);
 app.set('views',path.join(__dirname, '/resources/views'));
