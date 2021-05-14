@@ -3,6 +3,9 @@
 
 
 @import './variables'; // underscore dene ki zaroorat nhi sass samajh jata hai ki ye ek partial  file hai, aur.scss bhi nhi dena. all bcoz of that underscor naming convention.
+@import '~noty/src/noty.scss';
+@import '~noty/src/themes/metroui.scss' ;
+
 
 body{
     font-family:'Lato', sans-serif;
@@ -41,7 +44,10 @@ section.hero{
      background: $primary;
     border-color: $pure;
      color: $pure; 
-  }  
+  } 
+  &:focus{
+      outline: none;
+  } 
 }
 
 .btn-primary{
@@ -63,4 +69,10 @@ section.cart{
 section.login{
     background: $secondary;
     min-height: calc(100vh - 86px);
+}
+
+.noty_theme__metroui{
+    border-radius: 50px ! important;
+    padding-left: 8px ! important;
+    
 }
