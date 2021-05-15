@@ -7,6 +7,8 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const flash = require('express-flash');
 const MongoDbStore = require('connect-mongo');
+const passport = require('passport');
+
   
  
 
@@ -40,13 +42,22 @@ app.use(session({
 app.use(flash());
 
 
+//passport config---> important to put it after session config, coz it uses session.
+require('./app/config/passport')(passport);
+app.use(passport.initialize());
+app.use(passport.session());// as passport usses sessionn som we initialized that.
+// we can even create local strategy here, but that code is a bit big, do we do that in a sepaarate file.
+
+
 //assets
 app.use(express.static('public'));
 app.use(express.json());
+app.use(express.urlencoded({extended: false}));
 
 //globall middlewares 
 app.use((req,res,next)=>{
 res.locals.session = req.session;
+res.locals.user = req.user;// jobhi logged in user hai wo set hojayega ispe.
 next();
 });
 
