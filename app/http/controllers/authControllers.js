@@ -7,6 +7,12 @@ const passport = require("passport");
 
 
 function authControllers(){
+     const _getRedirectUrl = (req)=>{
+         return req.user.role === 'admin' ? '/admin/orders' : '/customers/orders'
+     }
+    
+    
+    
     return{
         
         login:(req,res)=>{
@@ -31,7 +37,10 @@ function authControllers(){
                  return next(err)  
               } 
               console.log('logged in');
-              return res.redirect('/')
+
+            
+              return res.redirect(_getRedirectUrl(req));
+              // isme req hum isliye paas kar rhe taaki pta kar sake what's is req.user.role. admin ko admin/orders pe and customer ko customer/orders pe redirect karenge
 
             })
          })(req, res, next);

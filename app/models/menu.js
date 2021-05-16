@@ -15,5 +15,5 @@ const menuSchema = new Schema({
 
 const Menu = mongoose.model('Menu',menuSchema);
 
-module.exports = Menu;
+module.exports = Menu; 
 // export kar rhe taaki apne controller se queery run kare in that file itself.

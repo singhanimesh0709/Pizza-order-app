@@ -3,6 +3,7 @@
 
 import axios from 'axios' // ye node modules se simport ho rhui hai
 import Noty from 'noty' 
+import {initAdmin} from './admin' // intAdmin ko import aise hi karenge, but whas se export ka tareeka bada gya hai
 
 // getting all buttons to add event listener
 let addToCart = document.querySelectorAll('.add-to-cart');
@@ -54,3 +55,14 @@ addToCart.forEach((btn)=>{
     
 
 })
+
+// removing alert msg after x seconds
+const alertMsg = document.querySelector('#success-alert');
+if(alertMsg){
+  
+   setTimeout(()=>alertMsg.remove(),2000);
+   
+}
+
+initAdmin();
+// just called it, all that code fromadmin.js file will be compiled here niw.
