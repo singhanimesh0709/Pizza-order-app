@@ -1,11 +1,12 @@
 import axios from 'axios';
 import moment from 'moment';
+import Noty from 'noty'
 
 
 
-export function initAdmin(){
+export function initAdmin(socket){
 const orderTableBody = document.querySelector('#orderTableBody');
-let orders = [];
+let orders = [];// thing to remember, orders is an array.
 let markup;
 
 axios.get('/admin/orders',{headers:{"X-Requested-With":"XMLHttpRequest"}})
@@ -30,7 +31,7 @@ function renderItems(items){
 /*remember we populated full userr data also with the help of customerId. so thats why we have access to order.customerId.name */
 
 function generateMarkup(orders){
-    return orders.map(order=>{
+    return orders.map((order)=>{
         
         return `
         <tr>
@@ -42,21 +43,21 @@ function generateMarkup(orders){
                 <td class="border px-4 py-2">${ order.address }</td>
                 <td class="border px-4 py-2">
                     <div class="inline-block relative w-64">
-                        <form action="/admin/order/status" method="POST">
+                        <form action="/admin/orders/status" method="POST">
                             <input type="hidden" name="orderId" value="${ order._id }">
                             <select name="status" onchange="this.form.submit()"
                                 class="block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline">
-                                <option value="order_placed"
+                                <option value="Order Placed"
                                     ${ order.status === 'Order Placed' ? 'selected' : '' }>
                                     Placed</option>
-                                <option value="confirmed" ${ order.status === 'Confirmed' ? 'selected' : '' }>
+                                <option value="Confirmed" ${ order.status === 'Confirmed' ? 'selected' : '' }>
                                     Confirmed</option>
-                                <option value="prepared" ${ order.status === 'Prepared' ? 'selected' : '' }>
+                                <option value="Prepared" ${ order.status === 'Prepared' ? 'selected' : '' }>
                                     Prepared</option>
-                                <option value="delivered" ${ order.status === 'Delivered' ? 'selected' : '' }>
+                                <option value="Delivered" ${ order.status === 'Delivered' ? 'selected' : '' }>
                                     Delivered
                                 </option>
-                                <option value="completed" ${ order.status === 'Completed' ? 'selected' : '' }>
+                                <option value="Completed" ${ order.status === 'Completed' ? 'selected' : '' }>
                                     Completed
                                 </option>
                             </select>
@@ -81,6 +82,23 @@ function generateMarkup(orders){
         `
     }).join('')
 }
+
+socket.on('orderPlaced',(placedOrder)=>{
+    new Noty({// for adding the  alerts.
+        type:"success",
+        timeout: 1000,
+        progressBar:false,
+        theme: "metroui",
+    
+        text: 'New Order!'
+      }).show();
+
+    //orders.push('placedOrder'); -----> issse kya hoga ki wo order array ke end me chala jayega, aur fi wo humme last me dikhrga
+orders.unshift(placedOrder);// so here we add the new order at first place in array
+orderTableBody.innerHTML = ''; // we cleare the  innerHtML so that we can run generate markup gain
+orderTableBody.innerHTML = generateMarkup(orders); // and now we run generate markup for updated array orders
+
+})
 }
 
 // module.export = initAdmin ---> this wont work as  now we're in frontend js, 

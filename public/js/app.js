@@ -1849,11 +1849,15 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var axios__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(axios__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
 /* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var noty__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! noty */ "./node_modules/noty/lib/noty.js");
+/* harmony import */ var noty__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(noty__WEBPACK_IMPORTED_MODULE_2__);
 
 
-function initAdmin() {
+
+function initAdmin(socket) {
   var orderTableBody = document.querySelector('#orderTableBody');
-  var orders = [];
+  var orders = []; // thing to remember, orders is an array.
+
   var markup;
   axios__WEBPACK_IMPORTED_MODULE_0___default().get('/admin/orders', {
     headers: {
@@ -1880,9 +1884,26 @@ function initAdmin() {
 
   function generateMarkup(orders) {
     return orders.map(function (order) {
-      return "\n        <tr>\n                <td class=\"border px-4 py-2 text-green-900\">\n                    <p>".concat(order._id, "</p> \n                    <div>").concat(renderItems(order.items), "</div>\n                </td>\n                <td class=\"border px-4 py-2\">").concat(order.customerId.name, "</td> \n                <td class=\"border px-4 py-2\">").concat(order.address, "</td>\n                <td class=\"border px-4 py-2\">\n                    <div class=\"inline-block relative w-64\">\n                        <form action=\"/admin/order/status\" method=\"POST\">\n                            <input type=\"hidden\" name=\"orderId\" value=\"").concat(order._id, "\">\n                            <select name=\"status\" onchange=\"this.form.submit()\"\n                                class=\"block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline\">\n                                <option value=\"order_placed\"\n                                    ").concat(order.status === 'Order Placed' ? 'selected' : '', ">\n                                    Placed</option>\n                                <option value=\"confirmed\" ").concat(order.status === 'Confirmed' ? 'selected' : '', ">\n                                    Confirmed</option>\n                                <option value=\"prepared\" ").concat(order.status === 'Prepared' ? 'selected' : '', ">\n                                    Prepared</option>\n                                <option value=\"delivered\" ").concat(order.status === 'Delivered' ? 'selected' : '', ">\n                                    Delivered\n                                </option>\n                                <option value=\"completed\" ").concat(order.status === 'Completed' ? 'selected' : '', ">\n                                    Completed\n                                </option>\n                            </select>\n                        </form>\n                        <div\n                            class=\"pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700\">\n                            <svg class=\"fill-current h-4 w-4\" xmlns=\"http://www.w3.org/2000/svg\"\n                                viewBox=\"0 0 20 20\">\n                                <path\n                                    d=\"M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z\" />\n                            </svg>\n                        </div>\n                    </div>\n                </td>\n                <td class=\"border px-4 py-2\">\n                    ").concat(moment__WEBPACK_IMPORTED_MODULE_1___default()(order.createdAt).format('hh:mm A'), "\n                </td>\n                <td class=\"border px-4 py-2\">\n                    ").concat(order.paymentStatus ? 'paid' : 'Not paid', "\n                </td>\n            </tr>\n        ");
+      return "\n        <tr>\n                <td class=\"border px-4 py-2 text-green-900\">\n                    <p>".concat(order._id, "</p> \n                    <div>").concat(renderItems(order.items), "</div>\n                </td>\n                <td class=\"border px-4 py-2\">").concat(order.customerId.name, "</td> \n                <td class=\"border px-4 py-2\">").concat(order.address, "</td>\n                <td class=\"border px-4 py-2\">\n                    <div class=\"inline-block relative w-64\">\n                        <form action=\"/admin/orders/status\" method=\"POST\">\n                            <input type=\"hidden\" name=\"orderId\" value=\"").concat(order._id, "\">\n                            <select name=\"status\" onchange=\"this.form.submit()\"\n                                class=\"block appearance-none w-full bg-white border border-gray-400 hover:border-gray-500 px-4 py-2 pr-8 rounded shadow leading-tight focus:outline-none focus:shadow-outline\">\n                                <option value=\"Order Placed\"\n                                    ").concat(order.status === 'Order Placed' ? 'selected' : '', ">\n                                    Placed</option>\n                                <option value=\"Confirmed\" ").concat(order.status === 'Confirmed' ? 'selected' : '', ">\n                                    Confirmed</option>\n                                <option value=\"Prepared\" ").concat(order.status === 'Prepared' ? 'selected' : '', ">\n                                    Prepared</option>\n                                <option value=\"Delivered\" ").concat(order.status === 'Delivered' ? 'selected' : '', ">\n                                    Delivered\n                                </option>\n                                <option value=\"Completed\" ").concat(order.status === 'Completed' ? 'selected' : '', ">\n                                    Completed\n                                </option>\n                            </select>\n                        </form>\n                        <div\n                            class=\"pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700\">\n                            <svg class=\"fill-current h-4 w-4\" xmlns=\"http://www.w3.org/2000/svg\"\n                                viewBox=\"0 0 20 20\">\n                                <path\n                                    d=\"M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z\" />\n                            </svg>\n                        </div>\n                    </div>\n                </td>\n                <td class=\"border px-4 py-2\">\n                    ").concat(moment__WEBPACK_IMPORTED_MODULE_1___default()(order.createdAt).format('hh:mm A'), "\n                </td>\n                <td class=\"border px-4 py-2\">\n                    ").concat(order.paymentStatus ? 'paid' : 'Not paid', "\n                </td>\n            </tr>\n        ");
     }).join('');
   }
+
+  socket.on('orderPlaced', function (placedOrder) {
+    new (noty__WEBPACK_IMPORTED_MODULE_2___default())({
+      // for adding the  alerts.
+      type: "success",
+      timeout: 1000,
+      progressBar: false,
+      theme: "metroui",
+      text: 'New Order!'
+    }).show(); //orders.push('placedOrder'); -----> issse kya hoga ki wo order array ke end me chala jayega, aur fi wo humme last me dikhrga
+
+    orders.unshift(placedOrder); // so here we add the new order at first place in array
+
+    orderTableBody.innerHTML = ''; // we cleare the  innerHtML so that we can run generate markup gain
+
+    orderTableBody.innerHTML = generateMarkup(orders); // and now we run generate markup for updated array orders
+  });
 } // module.export = initAdmin ---> this wont work as  now we're in frontend js, 
 // so according to ES6 just add 'export' keyword before the function  you want to export and then just import like using import keword.
 
@@ -1901,13 +1922,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var noty__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! noty */ "./node_modules/noty/lib/noty.js");
 /* harmony import */ var noty__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(noty__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _admin__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./admin */ "./resources/js/admin.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
+/* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_3__);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 // yha pe hum clienr side javascript likhenge, aur yha pe jo hum likhnge wo baadme humare tool ke madad se 
 // jake public ke app.js me save hoga , aur usko hum include karenge in our real proj code/routes
  // ye node modules se simport ho rhui hai
 
 
  // intAdmin ko import aise hi karenge, but whas se export ka tareeka bada gya hai
-// getting all buttons to add event listener
+
+ // getting all buttons to add event listener
 
 var addToCart = document.querySelectorAll('.add-to-cart');
 var cartnum = document.querySelector(".cartnum");
@@ -1948,9 +1978,82 @@ if (alertMsg) {
   setTimeout(function () {
     return alertMsg.remove();
   }, 2000);
+} //===========to updaet stustus on our ordeer page================== 
+
+
+var statuses = document.querySelectorAll('.status-line');
+var hiddenItem = document.getElementById("hiddenItem");
+var order = hiddenItem ? hiddenItem.value : null;
+order = JSON.parse(order);
+var time = document.createElement('small'); // ye aese elemnt isliye create kar rhe bcoz, we need to change position of this time also with changing status, and even its position.
+
+function updateStatus(order) {
+  statuses.forEach(function (status) {
+    // ---> ye karna zaroori hai warna, updatedOrder ke liye 2-2 orange ho rhe the, poorani class ko rmove kiiiya.
+    status.classList.remove('step-completed');
+    status.classList.remove('current');
+  }); //---> toh pahle ye saare classes clear kardega,  aur fir naye se nya logic chalayega humara jo neeche code me hai.
+
+  var stepCompleted = true;
+  statuses.forEach(function (status) {
+    var dataStatus = status.dataset.status;
+
+    if (stepCompleted) {
+      status.classList.add('step-completed'); // ye iska matlab ab uss li ke class me step-ccompleted add hoga matlab wo grey ho jayega. 
+      // aur kyukihumne pahle se hi stepCompleted = true kiya hai  iskam matlab first wla humesha grey rahega.
+    }
+
+    if (dataStatus === order.status) {
+      stepCompleted = false; // we do this bcoz, all the next elements should be black in colour only, if not did alll will become grey,as we have set statusCompleted = true be default.
+
+      time.innerText = moment__WEBPACK_IMPORTED_MODULE_3___default()(order.updatedAt).format('hh:mm A');
+      status.appendChild(time); // appendchild matlab, li ke andar span ke baad time yaani small tag aa jayega.
+
+      if (status.nextElementSibling) {
+        //--> last wale pe rokne ke liye check kiya.
+        status.nextElementSibling.classList.add('current'); // here we check if status in that li element is same as order.status in the DB , then we add current class to the next li element .
+        // and thus that will become orange. coz if dataStatus == order.status , means that this step is complete and current step is next one.
+      }
+    }
+  });
 }
 
-(0,_admin__WEBPACK_IMPORTED_MODULE_2__.initAdmin)(); // just called it, all that code fromadmin.js file will be compiled here niw.
+updateStatus(order); //socket------------------
+
+var socket = io('http://localhost:3000');
+(0,_admin__WEBPACK_IMPORTED_MODULE_2__.initAdmin)(socket); // just called it, all that code fromadmin.js file will be compiled here niw.
+//join
+
+if (order) {
+  socket.emit('join', "order_".concat(order._id));
+} // we have this order coz we fetched it from thr hiddenItem  input tag above.
+// this sends a messaag eto the server , joi n karke emit karega aur bolega ceate a rooom of name which was passed as second parameter.
+
+
+var adminArea = window.location.pathname;
+
+if (adminArea.includes('admin')) {
+  socket.emit('join', 'adminRoom'); //--> we use same 'join' message coz we already have finctionality for that in our server .js. and this time we make only one room
+}
+
+socket.on('orderUpdated', function (data) {
+  var updatedOrder = _objectSpread({}, order); // this how we copy an object in node.
+
+
+  updatedOrder.updatedAt = moment__WEBPACK_IMPORTED_MODULE_3___default()().format(); // storing current time in the the updatedAt field .
+
+  updatedOrder.status = data.status;
+  updateStatus(updatedOrder); // ---> as this is the function that changes colours in our that status page, and everything on client side, so we pass on this updatedOrder to it.
+
+  new (noty__WEBPACK_IMPORTED_MODULE_1___default())({
+    // for adding the  alerts.
+    type: "warning",
+    timeout: 1000,
+    progressBar: false,
+    theme: "metroui",
+    text: 'Order Updated'
+  }).show();
+});
 
 /***/ }),
 

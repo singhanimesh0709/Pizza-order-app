@@ -7,7 +7,8 @@ const passport = require("passport");
 
 
 function authControllers(){
-     const _getRedirectUrl = (req)=>{
+     function  _getRedirectUrl(req){
+        console.log(req.user.role);
          return req.user.role === 'admin' ? '/admin/orders' : '/customers/orders'
      }
     
@@ -36,7 +37,7 @@ function authControllers(){
                 req.flash('error',info.message)
                  return next(err)  
               } 
-              console.log('logged in');
+              
 
             
               return res.redirect(_getRedirectUrl(req));
