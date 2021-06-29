@@ -20,7 +20,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 //Database connection
-const db = 'mongodb+srv://animesh:4405tiger@nodeproj1.fvwrz.mongodb.net/pizza?retryWrites=true&w=majority';
+const db = process.env.MONGO_CONNECTION_URL;
 mongoose.connect(db,{useNewUrlParser: true, useUnifiedTopology: true})
 .then(()=>{console.log('MongoDB Connected');})
 .catch(err=> console.log(err));
@@ -69,8 +69,12 @@ app.use(expressLayouts);
 app.set('views',path.join(__dirname, '/resources/views'));
 app.set('view engine','ejs'); 
 
-//rioutes
+//rioutes-------------
 require('./routes/web')(app);
+//for 404 page---> basically iske liye hum ek middleware bnayenge.
+app.use((req,res)=>{
+res.status(404).render('errors/404');
+})
 
 
 

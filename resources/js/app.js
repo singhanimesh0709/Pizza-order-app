@@ -5,6 +5,8 @@ import axios from 'axios' // ye node modules se simport ho rhui hai
 import Noty from 'noty' 
 import {initAdmin} from './admin' // intAdmin ko import aise hi karenge, but whas se export ka tareeka bada gya hai
 import moment from 'moment'
+import {initStripe} from './stripe'
+
 // getting all buttons to add event listener
 let addToCart = document.querySelectorAll('.add-to-cart');
 let cartnum = document.querySelector(".cartnum");
@@ -98,20 +100,21 @@ if(status.nextElementSibling){ //--> last wale pe rokne ke liye check kiya.
    status.nextElementSibling.classList.add('current')
    // here we check if status in that li element is same as order.status in the DB , then we add current class to the next li element .
    // and thus that will become orange. coz if dataStatus == order.status , means that this step is complete and current step is next one.
-}
-   
-}
+}}
 })
-
 }
 
 updateStatus(order);
 
 
+initStripe();
+
+
+
+
 //socket------------------
 let socket = io('http://localhost:3000');
-initAdmin(socket);
-// just called it, all that code fromadmin.js file will be compiled here niw.
+
 
 //join
 if(order){
@@ -122,7 +125,10 @@ if(order){
 
 let adminArea = window.location.pathname;
 if(adminArea.includes('admin')){
-   socket.emit('join', 'adminRoom'); //--> we use same 'join' message coz we already have finctionality for that in our server .js. and this time we make only one room
+   initAdmin(socket);
+// just called it, all that code fromadmin.js file will be compiled here niw.
+  
+socket.emit('join', 'adminRoom'); //--> we use same 'join' message coz we already have finctionality for that in our server .js. and this time we make only one room
 }
 
 

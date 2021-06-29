@@ -1,5 +1,6 @@
 const moment = require("moment");
 const Order = require("../../../models/order");
+const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY)
 
 
 
@@ -7,9 +8,10 @@ const Order = require("../../../models/order");
 function orderControllers(){
     return{
         store:(req,res)=>{
-          const {phone, address} = req.body;
+          const {phone, address,stripeToken,paymentType} = req.body;
           if(!phone || !address){
-              req.flash('error',"All fields are required");
+              //req.flash('error',"All fields are required"); --> not required now as we are usimg the axios, ka noty
+             return res.status(422).json({message:"All fields are required"}); 
           }
           const order = new Order({
              customerId : req.user._id ,
@@ -20,20 +22,52 @@ function orderControllers(){
           order.save()
           .then((result)=>{
               Order.populate(result,{path: 'customerId'},(err,placedOrder)=>{
-                req.flash('success','Order successfully placed');
-                delete req.session.cart; // deleting items in cart coz order is placed. JS me kisi bhi object ki  property aise delete hoti hai.
+                //req.flash('success','Order successfully placed'); ---> this we'lll d o now by NOTY
                
-               //emitting event
+                if(paymentType === 'card'){
+                //stripe logic
+                stripe.charges.create({
+                  amount: req.session.cart.totalPrice * 100,
+                  source: stripeToken,
+                  currency: 'inr',
+                  description: `Pizza order: ${placedOrder._id}`  
+                }).then(()=>{
+                    placedOrder.paymentStatus = true;
+                    placedOrder.paymentType = paymentType;
+
+                    placedOrder.save().then((updOrd)=>{
+                      //emitting event
+                          const eventEmitter = req.app.get('eventEmitter');
+                          eventEmitter.emit('orderPlaced',updOrd);
+                           delete req.session.cart; // deleting items in cart coz order is placed. JS me kisi bhi object ki  property aise delete hoti hai.  
+                           return res.json({message:"Payment successful, and order placed."})   
+                    }).catch((err)=>{
+                       console.log('error in updating updOrd');
+                    })
+
+                }).catch((err)=>{
+                    delete req.session.cart;
+                    return res.json({message:"Payment failed, but order is placed , you can pay at the time of delivery."})  
+                })
+               }else{
+                    //emitting event
                const eventEmitter = req.app.get('eventEmitter');
                eventEmitter.emit('orderPlaced',placedOrder);
-               return res.redirect('/customers/orders');    
-              })
+                delete req.session.cart; // deleting items in cart coz order is placed. JS me kisi bhi object ki  property aise delete hoti hai.  
+                return res.json({message:"Order successfully placed."}) 
+               //return res.redirect('/customers/orders');  -- now we don't reditrect, we send JSON  and we'll reidrect there in fronend js , by window.location.hreef
+               }
+               
+              
+                
+            })
              
           
             }).catch((err)=>{
-              req.flash('error','Something went wrong');
+                return res.status(500).json({message:"Something went wrong 😕"})
+                //   req.flash('error','Something went wrong');
               console.log('error occured in here, order contollers')
-              return res.redirect('/customers/orders');
+            //   return res.redirect('/customers/orders');
           })
         },
 

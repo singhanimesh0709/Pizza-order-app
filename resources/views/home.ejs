@@ -4,7 +4,7 @@
     <div class="container mx-auto flex items-center justify-between">
       <div class =" w-1/2">
           <h6 class=" text-lg "><em>Are you hungry?</em></h6>
-          <h1 class="text-6xl font-bold">Don't Wait !</h1>
+          <h1 class="text-3xl md:text-5xl lg:text-6xl font-bold">Don't Wait !</h1>
           <button class="btn-primary rounded-full py-2 px-6 font-bold text-white mt-4">Order Now</button>
       </div>
       <div class="w-1/2">
@@ -16,10 +16,10 @@
     <h1 class=" text-2xl font-bold mb-8">All pizzas</h1>  
 
       <!-- agar yha lagaya forEach toh har baar wo ek grid bna dega,  but grid toh hum ek hi bnana chahte hai, uss grid me cards bharna baar baar chahte hai-->
-        <div class="grid grid-cols-4 gap-y-16 gap-x-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-16 gap-x-12">
              <!-- ab bas cards repeat honge in one grid-->
              <% pizzas.forEach((pizza)=>{ %>
-            <div class="w-64">
+            <div class="  w-full md:w-64">
                <img class="h-40 mb-4 mx-auto"  src="/img/<%=pizza.image %>" alt="pizzas">
                 <div class=" text-center">
                     <h2 class="mb-4 text-lg"><%=pizza.name %></h2>

@@ -11,6 +11,7 @@ items:{type: Object, required:true},// remember in cart we had an items object
 phone:{type:String, required: true},
 address:{type:String, required: true},
 paymentType:{type:String, default: 'COD'},
+paymentStatus:{type: Boolean, default: false},
 status:{type:String, default: 'Order Placed'}
 
 },{timestamps:true})
